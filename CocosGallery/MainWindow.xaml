@@ -1,0 +1,564 @@
+<Window 
+    x:Class="CocosGallery.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:CocosGallery"
+    xmlns:tb="using:H.NotifyIcon"
+    mc:Ignorable="d">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="Base"/>
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="RootGrid" KeyDown="RootGrid_KeyDown" PointerMoved="RootGrid_PointerMoved">
+        <Grid.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.ThemeDictionaries>
+                    <ResourceDictionary x:Key="Light">
+                        <SolidColorBrush x:Key="GlassButtonBrush" Color="#0D000000" />
+                        <AcrylicBrush x:Key="SidebarBackgroundBrush" TintColor="#F3F3F3" TintOpacity="0.8" FallbackColor="#E4E4E4"/>
+                        <AcrylicBrush x:Key="OverlayAcrylicBrush" TintColor="White" TintOpacity="0.5" FallbackColor="#80FFFFFF"/>
+                        <AcrylicBrush x:Key="MenuFlyoutBackgroundBrush" TintColor="#F3F3F3" TintOpacity="0.8" FallbackColor="#E4E4E4"/>
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="Dark">
+                        <SolidColorBrush x:Key="GlassButtonBrush" Color="#14FFFFFF" />
+                        <AcrylicBrush x:Key="SidebarBackgroundBrush" TintColor="#202020" TintOpacity="0.8" FallbackColor="#1F1F1F"/>
+                        <AcrylicBrush x:Key="OverlayAcrylicBrush" TintColor="Black" TintOpacity="0.1" FallbackColor="#202020"/>
+                        <AcrylicBrush x:Key="MenuFlyoutBackgroundBrush" TintColor="#202020" TintOpacity="0.8" FallbackColor="#1F1F1F"/>
+                    </ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>
+
+                <Style TargetType="MenuFlyoutPresenter">
+                    <Setter Property="Background" Value="{StaticResource MenuFlyoutBackgroundBrush}"/>
+                    <Setter Property="CornerRadius" Value="8"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderBrush" Value="{ThemeResource SurfaceStrokeColorDefaultBrush}"/>
+                    <Setter Property="Padding" Value="0,4"/>
+                    <Setter Property="MinWidth" Value="140"/>
+                </Style>
+
+                <Style TargetType="MenuFlyoutItem">
+                    <Setter Property="MinHeight" Value="30"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="Padding" Value="12,6,12,6"/>
+                </Style>
+
+                <Style TargetType="ToggleMenuFlyoutItem">
+                    <Setter Property="MinHeight" Value="30"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="Padding" Value="12,6,12,6"/>
+                </Style>
+
+                <Style TargetType="FlyoutPresenter">
+                    <Setter Property="Background" Value="{StaticResource MenuFlyoutBackgroundBrush}"/>
+                    <Setter Property="CornerRadius" Value="8"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderBrush" Value="{ThemeResource SurfaceStrokeColorDefaultBrush}"/>
+                    <Setter Property="Padding" Value="12"/>
+                </Style>
+
+                <Style TargetType="Button">
+                    <Setter Property="CornerRadius" Value="100"/>
+                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                    <Setter Property="Background" Value="{StaticResource GlassButtonBrush}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Grid x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal">
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetName="ScaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.07">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase EasingMode="EaseOut" Exponent="6"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                    <DoubleAnimation Storyboard.TargetName="ScaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.07">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase EasingMode="EaseOut" Exponent="6"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </VisualState>
+                                            <VisualState x:Name="PointerOver">
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.05"/>
+                                                </Storyboard>
+                                            </VisualState>
+                                            <VisualState x:Name="Pressed">
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetName="ScaleTransform" Storyboard.TargetProperty="ScaleX" To="0.75" Duration="0:0:0.04">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase EasingMode="EaseIn" Exponent="6"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                    <DoubleAnimation Storyboard.TargetName="ScaleTransform" Storyboard.TargetProperty="ScaleY" To="0.75" Duration="0:0:0.04">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase EasingMode="EaseIn" Exponent="6"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                    <Grid.RenderTransform>
+                                        <ScaleTransform x:Name="ScaleTransform" ScaleX="1" ScaleY="1"/>
+                                    </Grid.RenderTransform>
+                                    <ContentPresenter x:Name="ContentPresenter" Content="{TemplateBinding Content}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Padding="{TemplateBinding Padding}"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <Style x:Key="TrafficLightBtn" TargetType="Button">
+                    <Setter Property="Width" Value="14"/>
+                    <Setter Property="Height" Value="14"/>
+                    <Setter Property="CornerRadius" Value="100"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Margin" Value="0,0,8,0"/>
+                </Style>
+
+                <MenuFlyout x:Key="SettingsMenu" Placement="BottomEdgeAlignedLeft">
+                    <ToggleMenuFlyoutItem Text="Autohide Sidebar" IsChecked="{Binding IsAutoShrinkSidebar, Mode=TwoWay}" />
+                    <ToggleMenuFlyoutItem Text="Prefer context menus" IsChecked="{Binding IsPreferContextMenus, Mode=TwoWay}" />
+                    <ToggleMenuFlyoutItem Text="Wipe cache on close" IsChecked="{Binding IsWipeCacheOnClose, Mode=TwoWay}" />
+                    <ToggleMenuFlyoutItem Text="Cross-Memory Selection" IsChecked="{Binding IsCrossMemoryEnabled, Mode=TwoWay}" Click="CrossMemoryToggle_Click" />
+                </MenuFlyout>
+
+                <MenuFlyout x:Key="OverflowMenu" Placement="TopEdgeAlignedLeft" Opened="OverflowMenu_Opened" Closed="OverflowMenu_Closed">
+                    <MenuFlyoutItem Text="Scale Window" Click="ScaleWindow_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE9A6;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Close Viewer" Click="CloseViewer_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Cancel"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Previous Item" Click="PreviousBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE72B;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Next Item" Click="NextBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE72A;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Favorite" Click="FavBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE734;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Manage Tags" Click="TagBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE8EC;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="File Location" Click="LocationBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE8B7;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Edit in App" Click="EditBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE70F;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="File Properties" Click="InfoBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE946;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Delete Item" Click="DeleteBtn_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE74D;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+
+                <MenuFlyout x:Key="SingleItemMenu">
+                    <MenuFlyoutItem Text="Open file location" Click="SingleItemLocation_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE8B7;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Edit Tags" Click="EditTags_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Tag"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Rename" Click="SingleItemRename_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Rename"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Copy" Click="SingleItemCopy_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Copy"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem x:Name="SingleItemRestoreMenu" Text="Restore Item" Click="SingleItemRestore_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Undo"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Delete" Click="SingleItemDelete_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Delete"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+
+                <MenuFlyout x:Key="SelectionMenu">
+                    <MenuFlyoutItem Text="Edit Tags" Click="EditTags_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Tag"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Rename Selection" Click="BulkRename_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Rename"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Copy Selection" Click="BulkCopy_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Copy"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem x:Name="BulkRestoreMenu" Text="Restore Selection" Click="BulkRestore_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Undo"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Delete Selection" Click="BulkDelete_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Delete"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Cancel Selection" Click="CancelSelection_Click">
+                        <MenuFlyoutItem.Icon>
+                            <SymbolIcon Symbol="Cancel"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+
+                <Flyout x:Key="EditTagsFlyout" Placement="Right">
+                    <Flyout.FlyoutPresenterStyle>
+                        <Style TargetType="FlyoutPresenter">
+                            <Setter Property="Background" Value="{ThemeResource MenuFlyoutBackgroundBrush}" />
+                            <Setter Property="CornerRadius" Value="8" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="BorderBrush" Value="#20FFFFFF" />
+                            <Setter Property="BorderThickness" Value="1" />
+                        </Style>
+                    </Flyout.FlyoutPresenterStyle>
+                    <Grid Width="250" Padding="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Edit Tags" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <ListView ItemsSource="{Binding}" Grid.Row="1" MaxHeight="300" SelectionMode="None">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="local:TagItem">
+                                    <CheckBox Content="{x:Bind DisplayName, Mode=OneWay}" IsChecked="{x:Bind IsCheckedForEdit, Mode=TwoWay}" Margin="0,2" Visibility="{x:Bind IsVisibleInEditMenu, Mode=OneWay}"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <Grid Grid.Row="2" ColumnSpacing="8" Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="EditFlyoutNewTagBox" PlaceholderText="New tag..." />
+                            <Button Grid.Column="1" Content="+" Click="EditFlyoutNewTag_Click" />
+                        </Grid>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
+                            <Button Content="Cancel" Click="EditTagsCancel_Click" Background="#40FFFFFF"/>
+                            <Button Content="Done" Click="EditTagsDone_Click" Background="{ThemeResource AccentFillColorDefaultBrush}" Foreground="White"/>
+                        </StackPanel>
+                    </Grid>
+                </Flyout>
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid x:Name="ContentPush" Width="0" />
+
+            <Grid x:Name="ContentGrid" Grid.Column="1" SizeChanged="ContentGrid_SizeChanged" PointerWheelChanged="ContentGrid_PointerWheelChanged" ManipulationMode="Scale,TranslateX,TranslateY" ManipulationDelta="ContentGrid_ManipulationDelta" PointerEntered="ContentGrid_PointerEntered">
+                <GridView x:Name="ImageGridView" ItemsSource="{Binding MediaItems}" Padding="0,0,0,100" IsItemClickEnabled="True" SelectionMode="None">
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid Orientation="Horizontal" ItemWidth="{Binding CalculatedItemSize, Mode=OneWay}" ItemHeight="{Binding CalculatedItemSize, Mode=OneWay}"/>
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="local:MediaItem">
+                            <Grid Margin="1">
+                                <Image Source="{x:Bind Thumbnail}" Stretch="UniformToFill" />
+
+                                <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Visibility="{x:Bind SelectionIndicatorVisibility, Mode=OneWay}">
+                                    <Ellipse Width="24" Height="24" Fill="#FF0078D7" Stroke="White" StrokeThickness="2"/>
+                                    <TextBlock Text="{x:Bind SelectionIndex, Mode=OneWay}" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <Button Width="32" Height="32" CornerRadius="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Background="#80000000" Visibility="{x:Bind FocusButtonVisibility, Mode=OneWay}" Click="FocusItem_Click" Padding="0">
+                                    <FontIcon Glyph="&#xE890;" FontSize="14" Foreground="White"/>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </Grid>
+        </Grid>
+
+        <Grid>
+            <Grid x:Name="AppTitleBar" Height="32" VerticalAlignment="Top" Background="Transparent" Canvas.ZIndex="10"/>
+
+            <Grid x:Name="SidebarGrid" Width="260" HorizontalAlignment="Left" Background="{StaticResource SidebarBackgroundBrush}" Visibility="Collapsed" Canvas.ZIndex="20" PointerExited="SidebarGrid_PointerExited">
+                <Grid.RenderTransform>
+                    <TranslateTransform x:Name="SidebarTranslate" X="-260"/>
+                </Grid.RenderTransform>
+
+                <ScrollViewer Margin="0,48,0,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="16" Margin="16,10,16,10">
+                        <Border BorderBrush="#40000000" BorderThickness="1" CornerRadius="8" Padding="8">
+                            <StackPanel>
+                                <ListView x:Name="FolderListView" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder, Mode=TwoWay}"
+                                          CanDragItems="True" AllowDrop="True" CanReorderItems="True" DragItemsCompleted="FolderListView_DragItemsCompleted">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="local:FolderItem">
+                                            <Grid Padding="0,4" Background="Transparent">
+                                                <TextBlock Text="{x:Bind Name, Mode=OneWay}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                <Grid.ContextFlyout>
+                                                    <MenuFlyout>
+                                                        <MenuFlyoutItem Text="Open directory" Click="OpenFolderDirectory_Click">
+                                                            <MenuFlyoutItem.Icon>
+                                                                <FontIcon Glyph="&#xE8B7;"/>
+                                                            </MenuFlyoutItem.Icon>
+                                                        </MenuFlyoutItem>
+                                                        <MenuFlyoutItem Text="Rename" Click="RenameFolder_Click" Visibility="{x:Bind IsEditableVisibility, Mode=OneWay}"/>
+                                                        <MenuFlyoutItem Text="Copy" Click="CopyFolder_Click"/>
+                                                        <MenuFlyoutItem Text="Delete" Click="DeleteFolder_Click" Visibility="{x:Bind IsEditableVisibility, Mode=OneWay}"/>
+                                                    </MenuFlyout>
+                                                </Grid.ContextFlyout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                                <Button Click="AddFolder_Click" HorizontalAlignment="Stretch" CornerRadius="6" Margin="0,8,0,0" Padding="12,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                                        <TextBlock Text="Add Folder"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#40000000" BorderThickness="1" CornerRadius="8" Padding="8">
+                            <StackPanel>
+                                <ListView x:Name="TagListView" ItemsSource="{Binding Tags}" SelectionChanged="TagListView_SelectionChanged">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="local:TagItem">
+                                            <Grid Padding="0,4" Background="Transparent">
+                                                <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" VerticalAlignment="Center"/>
+                                                <Grid.ContextFlyout>
+                                                    <MenuFlyout>
+                                                        <MenuFlyoutItem Text="Rename" Click="RenameTag_Click" Visibility="{x:Bind IsEditableVisibility}"/>
+                                                        <MenuFlyoutItem Text="Delete" Click="DeleteTag_Click" Visibility="{x:Bind IsEditableVisibility}"/>
+                                                    </MenuFlyout>
+                                                </Grid.ContextFlyout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                                <Button Click="CreateTag_Click" HorizontalAlignment="Stretch" CornerRadius="6" Margin="0,8,0,0" Padding="12,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                                        <TextBlock Text="Add Tag"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#40000000" BorderThickness="1" CornerRadius="8" Padding="8">
+                            <ItemsControl ItemsSource="{Binding AvailableExtensions}" Margin="8,4,8,4">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <CheckBox Content="{x:Bind}" Margin="0,2" Checked="ExtensionFilter_Checked" Unchecked="ExtensionFilter_Unchecked"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <Grid VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="24" Canvas.ZIndex="15">
+                <Grid.RenderTransform>
+                    <TranslateTransform x:Name="BottomControlsTranslate" X="0"/>
+                </Grid.RenderTransform>
+
+                <StackPanel Orientation="Horizontal" Spacing="0">
+                    <Grid x:Name="SidebarExtrasWrapper" VerticalAlignment="Center">
+                        <StackPanel x:Name="SidebarExtrasContainer" Orientation="Horizontal" Spacing="12">
+                            <Button x:Name="GridScaleButton" Width="48" Height="48">
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="2 Items" Tag="2" Click="ScaleItem_Click"/>
+                                        <MenuFlyoutItem Text="4 Items" Tag="4" Click="ScaleItem_Click"/>
+                                        <MenuFlyoutItem Text="6 Items" Tag="6" Click="ScaleItem_Click"/>
+                                        <MenuFlyoutItem Text="8 Items" Tag="8" Click="ScaleItem_Click"/>
+                                        <MenuFlyoutItem Text="10 Items" Tag="10" Click="ScaleItem_Click"/>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                                <TextBlock Text="{Binding PhotosPerRow, Mode=OneWay}" FontSize="18" FontWeight="SemiBold"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel x:Name="SlidingControlsStack" Orientation="Horizontal" Spacing="12" Margin="12,0,0,0">
+                        <Button x:Name="SelectionFlyoutBtn" Width="48" Height="48" Visibility="{Binding HasSelectionVisibility, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE716;" FontSize="16"/>
+                            <Button.Flyout>
+                                <Flyout Placement="Top">
+                                    <ListView ItemsSource="{Binding SelectedItems}"
+          CanDragItems="True" AllowDrop="True" CanReorderItems="True"
+          SelectionMode="None" IsItemClickEnabled="True" ItemClick="SelectedItemsList_ItemClick"
+          MaxHeight="140" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                        <ListView.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <ItemsStackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ListView.ItemsPanel>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate x:DataType="local:MediaItem">
+                                                <Grid Width="100" Height="100" CornerRadius="8" Background="#1A000000" Margin="0,0,8,0">
+                                                    <Image Source="{x:Bind Thumbnail}" Stretch="UniformToFill" />
+                                                    <Grid Background="#A0000000" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="6,2" Margin="4" CornerRadius="4">
+                                                        <TextBlock Text="{x:Bind SelectionIndex, Mode=OneWay}" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                                                    </Grid>
+                                                    <Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4" Width="24" Height="24" CornerRadius="12" Padding="0" Click="DeselectItem_Click" Background="#A0000000" BorderThickness="0">
+                                                        <FontIcon Glyph="&#xE711;" Foreground="White" FontSize="10"/>
+                                                    </Button>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+
+                        <Button x:Name="SelectButton" Width="48" Height="48" Click="SelectBtn_Click">
+                            <FontIcon Glyph="&#xE762;" FontSize="16"/>
+                        </Button>
+
+                        <Grid>
+                            <AutoSuggestBox x:Name="MediaSearchBox" Width="48" Height="48" MinWidth="0" VerticalAlignment="Center" VerticalContentAlignment="Center" PlaceholderText="" QueryIcon="{x:Null}" Background="{StaticResource GlassButtonBrush}" BorderThickness="0" CornerRadius="24" Padding="38,0,8,0" GotFocus="MediaSearchBox_GotFocus" LostFocus="MediaSearchBox_LostFocus" TextChanged="SearchBox_TextChanged"/>
+                            <FontIcon x:Name="SearchIcon" Glyph="&#xE721;" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0" IsHitTestVisible="False" Opacity="0.7"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="SettingsAnchor" Width="1" Height="1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,38,0,0" IsHitTestVisible="False" Canvas.ZIndex="25"/>
+            <Grid x:Name="MenuAnchor" Width="1" Height="1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="24,0,0,24" IsHitTestVisible="False" Canvas.ZIndex="25"/>
+
+            <Grid x:Name="ViewerOverlay" Visibility="Collapsed" PointerMoved="ViewerOverlay_PointerMoved" PointerPressed="ViewerOverlay_PointerPressed" RightTapped="ViewerOverlay_RightTapped" Canvas.ZIndex="25">
+                <Grid.Background>
+                    <StaticResource ResourceKey="OverlayAcrylicBrush"/>
+                </Grid.Background>
+
+                <ScrollViewer x:Name="MediaScrollViewer" ZoomMode="Enabled" MinZoomFactor="1.0" MaxZoomFactor="48.0" 
+                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" 
+                              PointerPressed="MediaScrollViewer_PointerPressed" 
+                              PointerMoved="MediaScrollViewer_PointerMoved" 
+                              PointerReleased="MediaScrollViewer_PointerReleased" 
+                              SizeChanged="MediaScrollViewer_SizeChanged">
+                    <Grid x:Name="CenteringGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Transparent">
+                        <Image x:Name="ViewerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <MediaPlayerElement x:Name="ViewerVideo" Visibility="Collapsed" AutoPlay="True" AreTransportControlsEnabled="True" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"/>
+                    </Grid>
+                </ScrollViewer>
+
+                <StackPanel x:Name="BottomActionPanel" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Spacing="12" Margin="24">
+                    <StackPanel.RenderTransform>
+                        <TranslateTransform x:Name="BottomPanelTranslate" X="0" Y="0"/>
+                    </StackPanel.RenderTransform>
+
+                    <Button x:Name="CollapseToggleButton" Width="38" Height="38" Click="CollapseToggleButton_Click">
+                        <FontIcon x:Name="ToggleIcon" Glyph="&#xE76B;" Foreground="White" FontSize="16"/>
+                    </Button>
+
+                    <StackPanel x:Name="CollapsibleButtons" Orientation="Horizontal" Spacing="12">
+                        <Button Width="38" Height="38" Click="ScaleWindow_Click">
+                            <FontIcon Glyph="&#xE9A6;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="CloseViewer_Click">
+                            <SymbolIcon Symbol="Cancel" Foreground="White"/>
+                        </Button>
+                        <Rectangle x:Name="ActionSeparator" Width="1" Height="20" Fill="White" Opacity="0.2" VerticalAlignment="Center"/>
+                        <Button Width="38" Height="38" Click="PreviousBtn_Click">
+                            <FontIcon Glyph="&#xE72B;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="NextBtn_Click">
+                            <FontIcon Glyph="&#xE72A;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="FavBtn_Click">
+                            <FontIcon Glyph="&#xE734;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="TagBtn_Click">
+                            <FontIcon Glyph="&#xE8EC;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="DeleteBtn_Click">
+                            <FontIcon Glyph="&#xE74D;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="LocationBtn_Click">
+                            <FontIcon Glyph="&#xE8B7;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="EditBtn_Click">
+                            <FontIcon Glyph="&#xE70F;" Foreground="White" FontSize="16"/>
+                        </Button>
+                        <Button Width="38" Height="38" Click="InfoBtn_Click">
+                            <FontIcon Glyph="&#xE946;" Foreground="White" FontSize="16"/>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="TopTrafficLights" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="20,7,0,0" Canvas.ZIndex="30">
+                <Grid.RenderTransform>
+                    <TranslateTransform x:Name="TopPanelTranslate" Y="0"/>
+                </Grid.RenderTransform>
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource TrafficLightBtn}" Background="#FF5F56" Click="TrafficLightClose_Click"/>
+                    <Button Style="{StaticResource TrafficLightBtn}" Background="#FFBD2E" Click="TrafficLightMinimize_Click"/>
+                    <Button Style="{StaticResource TrafficLightBtn}" Background="#27C93F" Click="TrafficLightMaximize_Click"/>
+                    <Button Style="{StaticResource TrafficLightBtn}" Background="#2196F3" Click="SettingsLight_Click" x:Name="SettingsLightBtn"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
