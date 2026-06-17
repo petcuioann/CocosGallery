@@ -147,7 +147,6 @@ namespace CocosGallery
             }
             this.MediaScrollViewer.ChangeView(null, 0, null, true);
             AnimateHud(true);
-            StartIdleTimer();
         }
 
         private async void CrossMemoryToggle_Click(object sender, RoutedEventArgs e)
@@ -465,7 +464,17 @@ namespace CocosGallery
 
         private void StartIdleTimer() { _idleTimer.Stop(); _idleTimer.Start(); }
         private void StopIdleTimer() => _idleTimer.Stop();
-        private void IdleTimer_Tick(object? sender, object e) => AnimateHud(false);
+        private void IdleTimer_Tick(object? sender, object e)
+        {
+            if (this.ViewerOverlay.Visibility == Visibility.Visible)
+            {
+                AnimateHud(false);
+            }
+            else
+            {
+                StopIdleTimer();
+            }
+        }
 
         private void SingleClickTimer_Tick(object? sender, object e)
         {
@@ -506,7 +515,11 @@ namespace CocosGallery
 
             bottomSb.Children.Add(bottomAnim); bottomSb.Begin();
 
-            if (show) StartIdleTimer();
+            if (show)
+            {
+                if (this.ViewerOverlay.Visibility == Visibility.Visible) StartIdleTimer();
+                else StopIdleTimer();
+            }
             else
             {
                 StopIdleTimer();
