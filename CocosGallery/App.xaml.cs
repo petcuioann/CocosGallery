@@ -25,8 +25,22 @@ namespace CocosGallery
         {
             _mainDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             InitializeTrayIcon();
+
+            bool runInBackground = true;
+            if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.TryGetValue("RunInBackground", out object rib) && rib is bool ribVal)
+                runInBackground = ribVal;
+            UpdateTrayVisibility(runInBackground);
+
             UpdateKeepAlive();
             SpawnNewWindow();
+        }
+
+        public void UpdateTrayVisibility(bool isVisible)
+        {
+            if (_trayIcon != null)
+            {
+                _trayIcon.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         public void SpawnNewWindow()
@@ -76,6 +90,9 @@ namespace CocosGallery
             };
 
             _trayIcon.DoubleTapped += TrayIcon_DoubleTapped;
+            var leftClickCmd = new Microsoft.UI.Xaml.Input.XamlUICommand();
+            leftClickCmd.ExecuteRequested += (s, e) => SpawnNewWindow();
+            _trayIcon.LeftClickCommand = leftClickCmd;
             _trayIcon.ForceCreate();
         }
 
@@ -91,6 +108,8 @@ namespace CocosGallery
         {
             SpawnNewWindow();
         }
+
+
 
         private void ShowApp_Click(object sender, RoutedEventArgs e)
         {
@@ -151,7 +170,7 @@ namespace CocosGallery
             }
 
             foreach (var window in ActiveWindows.ToList()) window.Close();
-            Exit();
+            Environment.Exit(0);
         }
     }
 }

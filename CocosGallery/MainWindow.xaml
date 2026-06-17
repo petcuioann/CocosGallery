@@ -125,6 +125,7 @@
                 </Style>
 
                 <MenuFlyout x:Key="SettingsMenu" Placement="BottomEdgeAlignedLeft">
+                    <ToggleMenuFlyoutItem Text="Run in background" IsChecked="{Binding IsRunInBackgroundEnabled, Mode=TwoWay}" />
                     <ToggleMenuFlyoutItem Text="Autohide Sidebar" IsChecked="{Binding IsAutoShrinkSidebar, Mode=TwoWay}" />
                     <ToggleMenuFlyoutItem Text="Prefer context menus" IsChecked="{Binding IsPreferContextMenus, Mode=TwoWay}" />
                     <ToggleMenuFlyoutItem Text="Wipe cache on close" IsChecked="{Binding IsWipeCacheOnClose, Mode=TwoWay}" />

@@ -113,6 +113,20 @@ namespace CocosGallery
             set { if (SetProperty(ref _isPreferContextMenus, value)) ApplicationData.Current.LocalSettings.Values["PreferContextMenus"] = value; }
         }
 
+        private bool _isRunInBackgroundEnabled = true;
+        public bool IsRunInBackgroundEnabled
+        {
+            get => _isRunInBackgroundEnabled;
+            set 
+            { 
+                if (SetProperty(ref _isRunInBackgroundEnabled, value)) 
+                {
+                    ApplicationData.Current.LocalSettings.Values["RunInBackground"] = value;
+                    App.Instance?.UpdateTrayVisibility(value);
+                }
+            }
+        }
+
         private bool _isWipeCacheOnClose = false;
         public bool IsWipeCacheOnClose
         {
@@ -182,6 +196,7 @@ namespace CocosGallery
             if (ApplicationData.Current.LocalSettings.Values.TryGetValue("AutoShrink", out object stored) && stored is bool val) _isAutoShrinkSidebar = val;
             if (ApplicationData.Current.LocalSettings.Values.TryGetValue("PreferContextMenus", out object pcm) && pcm is bool pcmVal) _isPreferContextMenus = pcmVal;
             if (ApplicationData.Current.LocalSettings.Values.TryGetValue("WipeCacheOnClose", out object wcc) && wcc is bool wccVal) _isWipeCacheOnClose = wccVal;
+            if (ApplicationData.Current.LocalSettings.Values.TryGetValue("RunInBackground", out object rib) && rib is bool ribVal) _isRunInBackgroundEnabled = ribVal;
 
             Tags.Add(new TagItem { Name = "All Photos", Count = 0, IsEditable = false });
             Tags.Add(new TagItem { Name = "Favorites", Count = 0, IsEditable = false });

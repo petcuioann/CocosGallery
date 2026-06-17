@@ -190,9 +190,12 @@ namespace CocosGallery
 
             if (App.ActiveWindows.Count == 1 && App.ActiveWindows.Contains(this))
             {
-                args.Cancel = true;
-                this.AppWindow.Hide();
-                return;
+                if (this.ViewModel.IsRunInBackgroundEnabled)
+                {
+                    args.Cancel = true;
+                    this.AppWindow.Hide();
+                    return;
+                }
             }
         }
 
@@ -225,7 +228,14 @@ namespace CocosGallery
         {
             if (App.ActiveWindows.Count == 1 && App.ActiveWindows.Contains(this))
             {
-                this.AppWindow.Hide();
+                if (this.ViewModel.IsRunInBackgroundEnabled)
+                {
+                    this.AppWindow.Hide();
+                }
+                else
+                {
+                    this.Close();
+                }
             }
             else
             {
