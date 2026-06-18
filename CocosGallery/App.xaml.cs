@@ -27,8 +27,10 @@ namespace CocosGallery
             InitializeTrayIcon();
 
             bool runInBackground = true;
-            if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.TryGetValue("RunInBackground", out object rib) && rib is bool ribVal)
-                runInBackground = ribVal;
+            try {
+                if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.TryGetValue("RunInBackground", out object rib) && rib is bool ribVal)
+                    runInBackground = ribVal;
+            } catch { }
             UpdateTrayVisibility(runInBackground);
 
             UpdateKeepAlive();
@@ -82,12 +84,8 @@ namespace CocosGallery
             menu.Items.Add(showItem);
             menu.Items.Add(exitItem);
 
-            _trayIcon = new H.NotifyIcon.TaskbarIcon
-            {
-                ToolTipText = "Cocos Gallery",
-                IconSource = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new System.Uri("ms-appx:///Assets/icon.ico")),
-                ContextFlyout = menu
-            };
+            _trayIcon = (H.NotifyIcon.TaskbarIcon)this.Resources["TrayIcon"];
+            _trayIcon.ContextFlyout = menu;
 
             _trayIcon.DoubleTapped += TrayIcon_DoubleTapped;
             var leftClickCmd = new Microsoft.UI.Xaml.Input.XamlUICommand();
@@ -129,10 +127,12 @@ namespace CocosGallery
             }
 
             bool wipeCache = false;
-            if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.TryGetValue("WipeCacheOnClose", out object wcc) && wcc is bool wccVal)
-            {
-                wipeCache = wccVal;
-            }
+            try {
+                if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.TryGetValue("WipeCacheOnClose", out object wcc) && wcc is bool wccVal)
+                {
+                    wipeCache = wccVal;
+                }
+            } catch { }
 
             if (wipeCache)
             {
@@ -145,28 +145,27 @@ namespace CocosGallery
                 System.GC.WaitForPendingFinalizers();
                 await System.Threading.Tasks.Task.Delay(100);
 
-                try
-                {
-                    string cacheDir = System.IO.Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, "VideoThumbnails");
-                    if (System.IO.Directory.Exists(cacheDir)) System.IO.Directory.Delete(cacheDir, true);
-                    string recycleDir = System.IO.Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, "RecycleBin");
-                    if (System.IO.Directory.Exists(recycleDir)) System.IO.Directory.Delete(recycleDir, true);
+                    try {
+                        string localPath = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+                        string cacheDir = System.IO.Path.Combine(localPath, "VideoThumbnails");
+                        if (System.IO.Directory.Exists(cacheDir)) System.IO.Directory.Delete(cacheDir, true);
+                        string recycleDir = System.IO.Path.Combine(localPath, "RecycleBin");
+                        if (System.IO.Directory.Exists(recycleDir)) System.IO.Directory.Delete(recycleDir, true);
 
-                    Windows.Storage.StorageFolder tempFolder = Windows.Storage.ApplicationData.Current.TemporaryFolder;
-                    var tempFiles = await tempFolder.GetFilesAsync();
-                    foreach (var file in tempFiles)
-                    {
-                        try { await file.DeleteAsync(Windows.Storage.StorageDeleteOption.PermanentDelete); } catch { }
-                    }
+                        Windows.Storage.StorageFolder tempFolder = Windows.Storage.ApplicationData.Current.TemporaryFolder;
+                        var tempFiles = await tempFolder.GetFilesAsync();
+                        foreach (var file in tempFiles)
+                        {
+                            try { await file.DeleteAsync(Windows.Storage.StorageDeleteOption.PermanentDelete); } catch { }
+                        }
 
-                    Windows.Storage.StorageFolder localCacheFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
-                    var cacheFiles = await localCacheFolder.GetFilesAsync();
-                    foreach (var file in cacheFiles)
-                    {
-                        try { await file.DeleteAsync(Windows.Storage.StorageDeleteOption.PermanentDelete); } catch { }
-                    }
-                }
-                catch { }
+                        Windows.Storage.StorageFolder localCacheFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
+                        var cacheFiles = await localCacheFolder.GetFilesAsync();
+                        foreach (var file in cacheFiles)
+                        {
+                            try { await file.DeleteAsync(Windows.Storage.StorageDeleteOption.PermanentDelete); } catch { }
+                        }
+                    } catch { }
             }
 
             foreach (var window in ActiveWindows.ToList()) window.Close();
