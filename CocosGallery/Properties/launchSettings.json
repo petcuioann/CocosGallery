@@ -1,7 +1,7 @@
 {
   "profiles": {
-    "CocosGallery (Package)": {
-      "commandName": "MsixPackage"
+    "CocosGallery (Unpackaged)": {
+      "commandName": "Project"
     }
   }
 }

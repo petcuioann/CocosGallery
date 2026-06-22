@@ -312,7 +312,7 @@
                 <GridView x:Name="ImageGridView" ItemsSource="{Binding MediaItems}" Padding="0,0,0,100" IsItemClickEnabled="True" SelectionMode="None">
                     <GridView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <ItemsWrapGrid Orientation="Horizontal" ItemWidth="{Binding CalculatedItemSize, Mode=OneWay}" ItemHeight="{Binding CalculatedItemSize, Mode=OneWay}"/>
+                            <ItemsWrapGrid CacheLength="2" Orientation="Horizontal" ItemWidth="{Binding CalculatedItemSize, Mode=OneWay}" ItemHeight="{Binding CalculatedItemSize, Mode=OneWay}"/>
                         </ItemsPanelTemplate>
                     </GridView.ItemsPanel>
                     <GridView.ItemTemplate>

@@ -55,7 +55,7 @@ namespace CocosGallery
 
         public static ObservableCollection<MediaItem> GlobalSelectedItems { get; } = new();
 
-        private string MetadataFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, "gallery_metadata.json");
+        private string MetadataFilePath => Path.Combine(AppStorage.LocalFolderPath, "gallery_metadata.json");
 
         public ObservableCollection<TagItem> Tags { get; } = new();
         public ObservableCollection<FolderItem> Folders { get; } = new();
@@ -65,8 +65,8 @@ namespace CocosGallery
 
         public static bool IsCrossMemoryEnabled
         {
-            get => ApplicationData.Current.LocalSettings.Values["CrossMemory"] as bool? ?? false;
-            set => ApplicationData.Current.LocalSettings.Values["CrossMemory"] = value;
+            get => AppStorage.LocalSettings.Values["CrossMemory"] as bool? ?? false;
+            set => AppStorage.LocalSettings.Values["CrossMemory"] = value;
         }
 
         public ObservableCollection<MediaItem> SelectedItems { get; }
@@ -101,7 +101,7 @@ namespace CocosGallery
             {
                 if (SetProperty(ref _isAutoShrinkSidebar, value))
                 {
-                    ApplicationData.Current.LocalSettings.Values["AutoShrink"] = value;
+                    AppStorage.LocalSettings.Values["AutoShrink"] = value;
                 }
             }
         }
@@ -110,7 +110,7 @@ namespace CocosGallery
         public bool IsPreferContextMenus
         {
             get => _isPreferContextMenus;
-            set { if (SetProperty(ref _isPreferContextMenus, value)) ApplicationData.Current.LocalSettings.Values["PreferContextMenus"] = value; }
+            set { if (SetProperty(ref _isPreferContextMenus, value)) AppStorage.LocalSettings.Values["PreferContextMenus"] = value; }
         }
 
         private bool _isRunInBackgroundEnabled = true;
@@ -121,7 +121,7 @@ namespace CocosGallery
             { 
                 if (SetProperty(ref _isRunInBackgroundEnabled, value)) 
                 {
-                    ApplicationData.Current.LocalSettings.Values["RunInBackground"] = value;
+                    AppStorage.LocalSettings.Values["RunInBackground"] = value;
                     App.Instance?.UpdateTrayVisibility(value);
                 }
             }
@@ -131,7 +131,7 @@ namespace CocosGallery
         public bool IsWipeCacheOnClose
         {
             get => _isWipeCacheOnClose;
-            set { if (SetProperty(ref _isWipeCacheOnClose, value)) ApplicationData.Current.LocalSettings.Values["WipeCacheOnClose"] = value; }
+            set { if (SetProperty(ref _isWipeCacheOnClose, value)) AppStorage.LocalSettings.Values["WipeCacheOnClose"] = value; }
         }
 
         private bool _areActionButtonsVisible = true;
@@ -193,10 +193,10 @@ namespace CocosGallery
                 }
             };
 
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue("AutoShrink", out object stored) && stored is bool val) _isAutoShrinkSidebar = val;
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue("PreferContextMenus", out object pcm) && pcm is bool pcmVal) _isPreferContextMenus = pcmVal;
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue("WipeCacheOnClose", out object wcc) && wcc is bool wccVal) _isWipeCacheOnClose = wccVal;
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue("RunInBackground", out object rib) && rib is bool ribVal) _isRunInBackgroundEnabled = ribVal;
+            if (AppStorage.LocalSettings.Values.TryGetValue("AutoShrink", out object? stored) && stored is bool val) _isAutoShrinkSidebar = val;
+            if (AppStorage.LocalSettings.Values.TryGetValue("PreferContextMenus", out object? pcm) && pcm is bool pcmVal) _isPreferContextMenus = pcmVal;
+            if (AppStorage.LocalSettings.Values.TryGetValue("WipeCacheOnClose", out object? wcc) && wcc is bool wccVal) _isWipeCacheOnClose = wccVal;
+            if (AppStorage.LocalSettings.Values.TryGetValue("RunInBackground", out object? rib) && rib is bool ribVal) _isRunInBackgroundEnabled = ribVal;
 
             Tags.Add(new TagItem { Name = "All Photos", Count = 0, IsEditable = false });
             Tags.Add(new TagItem { Name = "Favorites", Count = 0, IsEditable = false });
@@ -204,7 +204,7 @@ namespace CocosGallery
 
             Folders.Add(new FolderItem { Name = "Pictures", Path = KnownFolders.PicturesLibrary.Path, IsSpecial = true });
 
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue("CustomFolders", out object fObj) && fObj is string fJson)
+            if (AppStorage.LocalSettings.Values.TryGetValue("CustomFolders", out object? fObj) && fObj is string fJson)
             {
                 try
                 {
@@ -237,7 +237,7 @@ namespace CocosGallery
         public void SaveFolders()
         {
             var customFolders = Folders.Where(f => !f.IsSpecial).Select(f => new { f.Name, f.Path }).ToList();
-            ApplicationData.Current.LocalSettings.Values["CustomFolders"] = JsonSerializer.Serialize(customFolders);
+            AppStorage.LocalSettings.Values["CustomFolders"] = JsonSerializer.Serialize(customFolders);
         }
 
         public void RemoveFolder(FolderItem folder)

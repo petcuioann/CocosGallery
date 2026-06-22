@@ -7,10 +7,15 @@
     xmlns:tb="using:H.NotifyIcon">
     <Application.Resources>
         <ResourceDictionary>
-            <tb:TaskbarIcon x:Key="TrayIcon" IconSource="/Assets/icon.ico" ToolTipText="Cocos Gallery" />
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
+            
+            <tb:TaskbarIcon x:Key="TrayIcon" IconSource="/Assets/icon.ico" ToolTipText="Cocos Gallery" />
+            
+            <Style TargetType="FontIcon">
+                <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

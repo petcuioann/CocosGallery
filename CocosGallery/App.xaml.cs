@@ -28,7 +28,7 @@ namespace CocosGallery
 
             bool runInBackground = true;
             try {
-                if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.TryGetValue("RunInBackground", out object rib) && rib is bool ribVal)
+                if (AppStorage.LocalSettings.Values.TryGetValue("RunInBackground", out object? rib) && rib is bool ribVal)
                     runInBackground = ribVal;
             } catch { }
             UpdateTrayVisibility(runInBackground);
@@ -120,15 +120,10 @@ namespace CocosGallery
         // complexity: O(n) where n is the number of cached files
         private async void ExitApp_Click(object sender, RoutedEventArgs e)
         {
-            if (_trayIcon != null)
-            {
-                _trayIcon.Dispose();
-                _trayIcon = null;
-            }
 
             bool wipeCache = false;
             try {
-                if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.TryGetValue("WipeCacheOnClose", out object wcc) && wcc is bool wccVal)
+                if (AppStorage.LocalSettings.Values.TryGetValue("WipeCacheOnClose", out object? wcc) && wcc is bool wccVal)
                 {
                     wipeCache = wccVal;
                 }
@@ -146,29 +141,37 @@ namespace CocosGallery
                 await System.Threading.Tasks.Task.Delay(100);
 
                     try {
-                        string localPath = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+                        string localPath = AppStorage.LocalFolderPath;
                         string cacheDir = System.IO.Path.Combine(localPath, "VideoThumbnails");
                         if (System.IO.Directory.Exists(cacheDir)) System.IO.Directory.Delete(cacheDir, true);
                         string recycleDir = System.IO.Path.Combine(localPath, "RecycleBin");
                         if (System.IO.Directory.Exists(recycleDir)) System.IO.Directory.Delete(recycleDir, true);
 
-                        Windows.Storage.StorageFolder tempFolder = Windows.Storage.ApplicationData.Current.TemporaryFolder;
-                        var tempFiles = await tempFolder.GetFilesAsync();
-                        foreach (var file in tempFiles)
-                        {
-                            try { await file.DeleteAsync(Windows.Storage.StorageDeleteOption.PermanentDelete); } catch { }
+                        string tempFolder = AppStorage.TemporaryFolderPath;
+                        if (System.IO.Directory.Exists(tempFolder)) {
+                            foreach (var file in System.IO.Directory.GetFiles(tempFolder)) {
+                                try { System.IO.File.Delete(file); } catch { }
+                            }
                         }
 
-                        Windows.Storage.StorageFolder localCacheFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
-                        var cacheFiles = await localCacheFolder.GetFilesAsync();
-                        foreach (var file in cacheFiles)
-                        {
-                            try { await file.DeleteAsync(Windows.Storage.StorageDeleteOption.PermanentDelete); } catch { }
+                        string localCacheFolder = AppStorage.LocalCacheFolderPath;
+                        if (System.IO.Directory.Exists(localCacheFolder)) {
+                            foreach (var file in System.IO.Directory.GetFiles(localCacheFolder)) {
+                                try { System.IO.File.Delete(file); } catch { }
+                            }
                         }
                     } catch { }
             }
 
             foreach (var window in ActiveWindows.ToList()) window.Close();
+            
+            if (_trayIcon != null)
+            {
+                try { _trayIcon.Dispose(); } catch { }
+                _trayIcon = null;
+            }
+
+            Application.Current.Exit();
             Environment.Exit(0);
         }
     }

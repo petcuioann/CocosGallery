@@ -10,18 +10,31 @@ namespace CocosGallery
         [STAThread]
         static void Main(string[] args)
         {
-            WinRT.ComWrappersSupport.InitializeComWrappers();
-
-            bool isRedirect = DecideRedirection();
-            if (!isRedirect)
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                Microsoft.UI.Xaml.Application.Start((p) =>
+                System.IO.File.WriteAllText("crash_log.txt", e.ExceptionObject.ToString());
+            };
+
+            try
+            {
+                WinRT.ComWrappersSupport.InitializeComWrappers();
+
+                bool isRedirect = DecideRedirection();
+                if (!isRedirect)
                 {
-                    var context = new DispatcherQueueSynchronizationContext(
-                        DispatcherQueue.GetForCurrentThread());
-                    SynchronizationContext.SetSynchronizationContext(context);
-                    new App();
-                });
+                    Microsoft.UI.Xaml.Application.Start((p) =>
+                    {
+                        var context = new DispatcherQueueSynchronizationContext(
+                            DispatcherQueue.GetForCurrentThread());
+                        SynchronizationContext.SetSynchronizationContext(context);
+                        new App();
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.IO.File.WriteAllText("crash_log.txt", ex.ToString());
+                throw;
             }
         }
 
@@ -39,15 +52,18 @@ namespace CocosGallery
                 {
                     isRedirect = true;
                     var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-                    mainInstance.RedirectActivationToAsync(activatedArgs).AsTask().Wait();
+                    var redirectTask = mainInstance.RedirectActivationToAsync(activatedArgs).AsTask();
+                    System.Threading.Tasks.Task.WaitAny(redirectTask, System.Threading.Tasks.Task.Delay(1000));
+                    Environment.Exit(0);
                 }
                 else
                 {
                     mainInstance.Activated += MainInstance_Activated;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.IO.File.WriteAllText("redirect_error.txt", ex.ToString());
             }
             return isRedirect;
         }

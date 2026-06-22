@@ -46,7 +46,7 @@ namespace CocosGallery
         private List<MediaItem> _previousSelection = new List<MediaItem>();
 
         private DispatcherTimer _singleClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
-        private MediaItem? _pendingSingleClickItem = null;
+
 
         private bool _isSidebarHovered = false;
         private DispatcherTimer _idleTimer = new DispatcherTimer();
@@ -959,7 +959,7 @@ namespace CocosGallery
                     if (isDoubleClick)
                     {
                         _singleClickTimer.Stop();
-                        _pendingSingleClickItem = null;
+
                     }
 
                     _lastClickTicks = currentTicks;
