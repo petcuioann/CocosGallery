@@ -1,0 +1,13 @@
+root = true
+
+[*.cs]
+csharp_prefer_braces = false:warning
+csharp_new_line_before_open_brace = none
+csharp_style_expression_bodied_methods = true:warning
+csharp_style_expression_bodied_constructors = true:warning
+csharp_style_expression_bodied_properties = true:warning
+csharp_style_expression_bodied_accessors = true:warning
+csharp_style_allow_embedded_statements_on_same_line_experimental = true:warning
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false:warning
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = true
