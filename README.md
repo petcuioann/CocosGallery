@@ -27,7 +27,7 @@ A sleek, robust, and fluid media gallery built exclusively for Windows using Win
 
 ## Developer Scripts
 
-The repository includes custom Python scripts located in the inner `CocosGallery` folder designed to maintain a specific, highly compact C# coding style ("snug formatting") and manage XML documentation.
+The repository includes custom Python scripts located in the inner `CocosGallery` folder designed for build automation, maintaining a highly compact C# coding style ("snug formatting"), and managing XML documentation.
 
 * **`SnugFormatter.py`**: A structural formatting script that traverses `.cs` files and compresses short methods and control blocks (if/foreach/while) into dense, single-line statements.
   * **Usage**: `py SnugFormatter.py` (formats all files)
@@ -35,6 +35,8 @@ The repository includes custom Python scripts located in the inner `CocosGallery
   * **Usage**: `py DocManager.py all 0` (hides docs across all files)
   * **Usage**: `py DocManager.py all 1` (restores docs across all files)
   * **Usage**: `py DocManager.py MainWindow.xaml.cs 0` (targets a specific file)
+* **`Publish.py`**: An automated build script that compiles the app into a standalone, single-file executable for a chosen platform (x64, x86, arm64). It outputs the final distribution-ready files to the `BuildOutputs` directory.
+  * **Usage**: `py Publish.py <platform>` (e.g., `py Publish.py x64`)
 
 ## About This Project
 
