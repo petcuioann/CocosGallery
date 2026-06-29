@@ -61,6 +61,6 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: py Publish.py <platform>")
         print("Available Platforms: x64, x86, arm64")
-        print("  Example: py Publish.py x64")
+        print("Example: py Publish.py x64")
     else:
         publish_app(sys.argv[1])

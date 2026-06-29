@@ -54,7 +54,7 @@ namespace CocosGallery {
             var dispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             if (dispatcher == null) return new LoadMoreItemsResult { Count = 0 };
 
-            var processedData = new List<(StorageFile File, IRandomAccessStream? Stream, MetadataEntry? Entry, bool IsVideo)>();
+            var processedData = new List<(StorageFile File, MetadataEntry? Entry, bool IsVideo)>();
 
             foreach (var file in files) {
                 if (MainViewModel.IsViewerOpen) break;
@@ -73,27 +73,19 @@ namespace CocosGallery {
                 if (_tagFilter != null && _tagFilter != "All Photos" && _tagFilter != "Favorites" && _tagFilter != "Recycle Bin")
                     if (entry == null || !entry.Tags.Contains(_tagFilter)) continue;
 
-                IRandomAccessStream? thumbStream = null;
-                var existingItem = MainViewModel.GlobalSelectedItems.FirstOrDefault(x => x.FilePath == file.Path);
-
-                if (existingItem == null)
-                    try { thumbStream = await file.GetThumbnailAsync(Windows.Storage.FileProperties.ThumbnailMode.ListView, 200); } catch { }
-
-                processedData.Add((file, thumbStream, entry, isVideo));
+                processedData.Add((file, entry, isVideo));
             }
 
             var tcs = new TaskCompletionSource<bool>();
 
-            dispatcher.TryEnqueue(async () => {
+            dispatcher.TryEnqueue(() => {
                 foreach (var data in processedData) {
                     var existingItem = MainViewModel.GlobalSelectedItems.FirstOrDefault(x => x.FilePath == data.File.Path);
                     MediaItem item;
 
                     if (existingItem != null) item = existingItem;
                     else {
-                        BitmapImage bmp = new BitmapImage();
-                        if (data.Stream != null) { await bmp.SetSourceAsync(data.Stream); data.Stream.Dispose(); }
-                        item = new MediaItem(data.File.Name, bmp, data.IsVideo, data.File.Path, data.File);
+                        item = new MediaItem(data.File.Name, null, data.IsVideo, data.File.Path);
                     }
 
                     item.IsSelectModeActive = MainViewModel.GlobalIsSelectMode;

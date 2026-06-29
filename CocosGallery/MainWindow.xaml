@@ -318,7 +318,7 @@
                     <GridView.ItemTemplate>
                         <DataTemplate x:DataType="local:MediaItem">
                             <Grid Margin="1">
-                                <Image Source="{x:Bind Thumbnail}" Stretch="UniformToFill" />
+                                <Image Source="{x:Bind Thumbnail, Mode=OneWay}" Stretch="UniformToFill" />
 
                                 <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Visibility="{x:Bind SelectionIndicatorVisibility, Mode=OneWay}">
                                     <Ellipse Width="24" Height="24" Fill="#FF0078D7" Stroke="White" StrokeThickness="2"/>
@@ -433,6 +433,9 @@
                                         <MenuFlyoutItem Text="6 Items" Tag="6" Click="ScaleItem_Click"/>
                                         <MenuFlyoutItem Text="8 Items" Tag="8" Click="ScaleItem_Click"/>
                                         <MenuFlyoutItem Text="10 Items" Tag="10" Click="ScaleItem_Click"/>
+                                        <MenuFlyoutItem Text="20 Items" Tag="20" Click="ScaleItem_Click"/>
+                                        <MenuFlyoutItem Text="50 Items" Tag="50" Click="ScaleItem_Click"/>
+                                        <MenuFlyoutItem Text="100 Items" Tag="100" Click="ScaleItem_Click"/>
                                     </MenuFlyout>
                                 </Button.Flyout>
                                 <TextBlock Text="{Binding PhotosPerRow, Mode=OneWay}" FontSize="18" FontWeight="SemiBold"/>
@@ -457,7 +460,7 @@
                                         <ListView.ItemTemplate>
                                             <DataTemplate x:DataType="local:MediaItem">
                                                 <Grid Width="100" Height="100" CornerRadius="8" Background="#1A000000" Margin="0,0,8,0">
-                                                    <Image Source="{x:Bind Thumbnail}" Stretch="UniformToFill" />
+                                                    <Image Source="{x:Bind Thumbnail, Mode=OneWay}" Stretch="UniformToFill" />
                                                     <Grid Background="#A0000000" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="6,2" Margin="4" CornerRadius="4">
                                                         <TextBlock Text="{x:Bind SelectionIndex, Mode=OneWay}" Foreground="White" FontSize="12" FontWeight="Bold"/>
                                                     </Grid>

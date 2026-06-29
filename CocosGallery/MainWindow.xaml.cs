@@ -58,10 +58,24 @@ namespace CocosGallery {
         private int _defaultLibraryWidth = 1000;
 
         private enum ActionPanelState { Vertical, Horizontal, Overflow }
-        /// <summary>111111111111111 the mats up the custom title bar, sidebar layout, and global event handlers.</summary>
         private ActionPanelState _currentActionState = ActionPanelState.Horizontal;
         private List<UIElement> _actionButtons = new List<UIElement>();
         private Rectangle? _actionSeparator;
+        private DispatcherTimer _viewportDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
+        private static readonly System.Threading.SemaphoreSlim _ioThrottle = new System.Threading.SemaphoreSlim(4, 4);
+        private ScrollViewer? _mainScrollViewer;
+        private int _currentMemoryStart = 0;
+        private int _currentMemoryEnd = 0;
+
+        private T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++) {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t) return t;
+                var result = FindVisualChild<T>(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
 
         /// <summary>Initializes the main window, sets up the custom title bar, sidebar layout, and global event handlers.</summary>
         public MainWindow() {
@@ -78,6 +92,14 @@ namespace CocosGallery {
             this.ViewModel.PropertyChanged += (s, e) => {
                 if (e.PropertyName == nameof(ViewModel.IsPreferContextMenus)) UpdateActionPanelLayout();
                 if (e.PropertyName == nameof(ViewModel.IsAutoShrinkSidebar)) AutoShrinkToggle_Changed();
+                if (e.PropertyName == nameof(ViewModel.MediaItems)) {
+                    if (this.ViewModel.MediaItems != null) {
+                        this.ViewModel.MediaItems.CollectionChanged += (s2, e2) => {
+                            if (!_viewportDebounceTimer.IsEnabled) _viewportDebounceTimer.Start();
+                        };
+                    }
+                    if (!_viewportDebounceTimer.IsEnabled) _viewportDebounceTimer.Start();
+                }
             };
 
             this.RootGrid.Loaded += (s, e) => {
@@ -109,6 +131,33 @@ namespace CocosGallery {
 
             _resizeTimer.Interval = TimeSpan.FromMilliseconds(16);
             _resizeTimer.Tick += ResizeTimer_Tick;
+
+            _viewportDebounceTimer.Tick += ViewportDebounceTimer_Tick;
+
+            this.ImageGridView.Loaded += (s, e) => {
+                _mainScrollViewer = FindVisualChild<ScrollViewer>(ImageGridView);
+                if (_mainScrollViewer != null) {
+                    _mainScrollViewer.ViewChanged += MainScrollViewer_ViewChanged;
+                    if (!_viewportDebounceTimer.IsEnabled) _viewportDebounceTimer.Start();
+                }
+            };
+
+            this.ViewModel.MediaItemsClearing += (s, e) => {
+                if (this.ViewModel.MediaItems != null) {
+                    foreach (var item in this.ViewModel.MediaItems) item.Thumbnail = null;
+                }
+                ThumbnailCacheManager.ClearInstance(this.AppWindow.Id.Value);
+                GC.Collect();
+            };
+
+            this.Closed += (s, e) => {
+                if (this.ViewModel.MediaItems != null) {
+                    foreach (var item in this.ViewModel.MediaItems) item.Thumbnail = null;
+                }
+                ThumbnailCacheManager.ClearInstance(this.AppWindow.Id.Value);
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            };
         }
 
         /// <summary>Resets the window's selection, viewer state, and navigation back to the root folder.</summary>
@@ -124,8 +173,76 @@ namespace CocosGallery {
         }
         /// <summary>Clears the viewer media sources and all loaded media items.</summary>
         public void ClearViewers() { this.ViewerImage.Source = null; this.ViewerVideo.Source = null; this.ViewModel.MediaItems.Clear(); this.ViewModel.ClearSelection(); }
-        /// <summary>Prevents window closure and instead minimizes it to the system tray if background mode is enabled.</summary>
-        private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args) { if (App.ActiveWindows.Count == 1 && App.ActiveWindows.Contains(this) && this.ViewModel.IsRunInBackgroundEnabled) { args.Cancel = true; this.AppWindow.Hide(); return; } }
+        private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args) {
+            if (App.ActiveWindows.Count == 1 && App.ActiveWindows.Contains(this) && this.ViewModel.IsRunInBackgroundEnabled) { args.Cancel = true; this.AppWindow.Hide(); return; }
+        }
+
+        private void MainScrollViewer_ViewChanged(object? sender, ScrollViewerViewChangedEventArgs e) {
+            if (!_viewportDebounceTimer.IsEnabled) _viewportDebounceTimer.Start();
+        }
+
+        private void ViewportDebounceTimer_Tick(object? sender, object e) {
+            _viewportDebounceTimer.Stop();
+            if (_mainScrollViewer == null) return;
+            double itemSize = ViewModel.CalculatedItemSize > 0 ? ViewModel.CalculatedItemSize : 150;
+            int photosPerRow = ViewModel.PhotosPerRow > 0 ? ViewModel.PhotosPerRow : 6;
+            
+            double visibleRows = _mainScrollViewer.ViewportHeight / itemSize;
+            double topVisibleRow = _mainScrollViewer.VerticalOffset / itemSize;
+
+            int startIndex = (int)(topVisibleRow) * photosPerRow;
+            int endIndex = startIndex + (int)(Math.Ceiling(visibleRows)) * photosPerRow;
+
+            int buffer = 2 * photosPerRow;
+            _currentMemoryStart = Math.Max(0, startIndex - buffer);
+            _currentMemoryEnd = endIndex + buffer;
+
+            var items = ViewModel.MediaItems;
+            ulong winId = this.AppWindow.Id.Value;
+
+            for (int i = 0; i < items.Count; i++) {
+                var item = items[i];
+                if (i < _currentMemoryStart || i > _currentMemoryEnd) {
+                    if (item.Thumbnail != null) {
+                        item.Thumbnail = null;
+                        ThumbnailCacheManager.RemoveThumbnail(winId, item.FilePath);
+                    }
+                } else {
+                    if (item.Thumbnail == null) {
+                        var cached = ThumbnailCacheManager.GetThumbnail(winId, item.FilePath);
+                        if (cached != null) item.Thumbnail = cached;
+                        else {
+                            _ = Task.Run(async () => {
+                                await _ioThrottle.WaitAsync();
+                                try {
+                                    var currentIdxPre = ViewModel.MediaItems.IndexOf(item);
+                                    if (currentIdxPre < _currentMemoryStart || currentIdxPre > _currentMemoryEnd) return;
+
+                                    StorageFile file = await StorageFile.GetFileFromPathAsync(item.FilePath);
+                                    using var stream = await file.GetThumbnailAsync(Windows.Storage.FileProperties.ThumbnailMode.ListView, (uint)itemSize);
+                                    if (stream != null) {
+                                        var clonedStream = stream.CloneStream();
+                                        DispatcherQueue.TryEnqueue(async () => {
+                                            var currentIdxPost = ViewModel.MediaItems.IndexOf(item);
+                                            if (currentIdxPost >= _currentMemoryStart && currentIdxPost <= _currentMemoryEnd) {
+                                                var bmp = new BitmapImage { DecodePixelWidth = (int)itemSize };
+                                                await bmp.SetSourceAsync(clonedStream);
+                                                ThumbnailCacheManager.CacheThumbnail(winId, item.FilePath, bmp);
+                                                item.Thumbnail = bmp;
+                                            }
+                                            clonedStream.Dispose();
+                                        });
+                                    }
+                                } catch { }
+                                finally {
+                                    _ioThrottle.Release();
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
         /// <summary>Restores the window from a minimized/hidden state and brings it to the foreground.</summary>
         public void ShowAndBringToFront() { this.AppWindow.Show(); if (this.AppWindow.Presenter is OverlappedPresenter presenter && presenter.State == OverlappedPresenterState.Minimized) presenter.Restore(); SetForegroundWindow(WinRT.Interop.WindowNative.GetWindowHandle(this)); }
         /// <summary>Brings the specified window to the foreground and activates it.</summary>

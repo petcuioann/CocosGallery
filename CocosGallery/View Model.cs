@@ -262,8 +262,10 @@ namespace CocosGallery {
         /// <summary>Filters the gallery based on a text search query.</summary>
         public void FilterBySearch(string? query) { _currentSearchQuery = string.IsNullOrWhiteSpace(query) ? null : query.ToLower(); RefreshMediaItems(); }
 
+        public event EventHandler? MediaItemsClearing;
+
         /// <summary>Re-initializes the incremental media source to apply new filters or folder selections.</summary>
-        public void RefreshMediaItems() { MediaItems = new IncrementalMediaSource(SelectedFolder?.Path, _currentTagFilter, _currentSearchQuery, ActiveExtensions); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MediaItems))); }
+        public void RefreshMediaItems() { MediaItemsClearing?.Invoke(this, EventArgs.Empty); MediaItems = new IncrementalMediaSource(SelectedFolder?.Path, _currentTagFilter, _currentSearchQuery, ActiveExtensions); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MediaItems))); }
 
         /// <summary>Deletes the currently selected item permanently or moves it to the Recycle Bin.</summary>
         /// <remarks>Complexity: O(n)</remarks>
