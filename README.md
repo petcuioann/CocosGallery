@@ -35,8 +35,9 @@ The repository includes custom Python scripts located in the inner `CocosGallery
   * **Usage**: `py DocManager.py all 0` (hides docs across all files)
   * **Usage**: `py DocManager.py all 1` (restores docs across all files)
   * **Usage**: `py DocManager.py MainWindow.xaml.cs 0` (targets a specific file)
-* **`Publish.py`**: An automated build script that compiles the app into a standalone, single-file executable for a chosen platform (x64, x86, arm64). It outputs the final distribution-ready files to the `BuildOutputs` directory.
-  * **Usage**: `py Publish.py <platform>` (e.g., `py Publish.py x64`)
+* **`Publish.py`**: An automated build script that compiles the app into a standalone, single-file executable for a chosen platform (x64, x86, arm64). It outputs the final distribution-ready files to the `BuildOutputs` directory. It also accepts a `mode` parameter to control whether the app size is reduced through code trimming.
+  * **Usage**: `py Publish.py <platform> <mode>` (e.g., `py Publish.py x64 trimmed`)
+  * **Modes**: `trimmed` (smaller size, strips unused framework code), `full` (includes everything)
 
 ## About This Project
 
